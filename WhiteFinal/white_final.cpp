@@ -27,28 +27,53 @@ public:
 
 		try {
 			stringstream stream(dateString);
+
 			stream >> year;
 			EnsureGoodStream(stream);
 			EnsureSkipNextSymbol(stream);
+
 			stream >> month;
 			EnsureGoodStream(stream);
 			EnsureSkipNextSymbol(stream);
+
+			// Check month value [1, 12]
+			if (month < 1 || month > 12) {
+				string curMonth = "Month value is invalid: " + to_string(month);
+				throw invalid_argument(curMonth);
+			}
+
 			stream >> day;
 			EnsureGoodStream(stream);
 
 			if (stream.peek() != EOF) {
 				throw runtime_error("");
 			}
+
+			// Check day value [1, 31]
+			if (day < 1 || day > 31) {
+				string curDay = "Day value is invalid: " + to_string(day);
+				throw invalid_argument(curDay);
+			}
 		}
 		catch(runtime_error& e) {
 			cout << "Wrong date format: " << dateString;
 			exit(1);
 		}
+		catch (invalid_argument& e) {
+			cout << e.what();
+			exit(1);
+		}
 	}
 
-	int GetYear() const;
-	int GetMonth() const;
-	int GetDay() const;
+	int GetYear() const {
+		return year;
+	}
+	int GetMonth() const {
+		return month;
+	}
+	int GetDay() const {
+		return day;
+	}
 
 private:
 	int year;
@@ -56,7 +81,19 @@ private:
 	int day;
 };
 
-bool operator<(const Date& lhs, const Date& rhs);
+bool operator < (const Date& lhs, const Date& rhs) {
+	if (lhs.GetYear() != rhs.GetYear()) {
+		return lhs.GetYear() < rhs.GetYear();
+	}
+	else if (lhs.GetMonth() != rhs.GetMonth()) {
+		return lhs.GetMonth() < rhs.GetMonth();
+	}
+	else if (lhs.GetDay() != rhs.GetDay()) {
+		return lhs.GetDay() < rhs.GetDay();
+	}
+
+	return false;
+}
 
 class Database {
 public:
@@ -74,8 +111,15 @@ int main() {
     
 	string command;
 	while (getline(cin, command)) {
-	// Считайте команды с потока ввода и обработайте каждую
+		// Считайте команды с потока ввода и обработайте каждую
 	}
+
+	/*string str;
+	cin >> str;
+
+	Date date(str);
+
+	cout << date.GetDay() << " " << date.GetMonth() << " " << date.GetYear() << endl;*/
 
 	system("pause");
 	return 0;
