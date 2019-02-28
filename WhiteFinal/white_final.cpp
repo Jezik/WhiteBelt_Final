@@ -4,6 +4,7 @@
 #include <sstream>
 #include <set>
 #include <map>
+#include <iomanip>
 
 using namespace std;
 
@@ -125,10 +126,28 @@ public:
 
 		return numberDeleted;
 	}
+	/* Returns set for given date with events.
+	   Will be printed in a main method. */
+	set<string> Find(const Date& date) const {
+		set<string> tempSet;
+		if (eventsDBmap.count(date) > 0) {
+			tempSet = eventsDBmap.at(date);
+		}
 
-	/* ??? */ Find(const Date& date) const;
-  
-	void Print() const;
+		return tempSet;
+	}
+	/* Prints the entire database in a format "date event".  
+	   YYYY-MM-DD event */
+	void Print() const {
+		for (const auto& pair : eventsDBmap) {
+			for (const auto& event : pair.second) {
+				cout << setfill('0') << setw(4) << pair.first.GetYear()
+					<< '-' << setfill('0') << setw(2) << pair.first.GetMonth()
+					<< '-' << setfill('0') << setw(2) << pair.first.GetDay()
+					<< " " << event << endl;
+			}
+		}
+	}
 
 private:
 	map<Date, set<string>> eventsDBmap;
