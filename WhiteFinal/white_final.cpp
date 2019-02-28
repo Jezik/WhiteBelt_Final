@@ -2,6 +2,8 @@
 #include <string>
 #include <exception>
 #include <sstream>
+#include <set>
+#include <map>
 
 using namespace std;
 
@@ -25,6 +27,8 @@ class Date {
 public:
 	Date(const string& dateString) {
 
+		/* Read string from beginning to the end. Check expected format "year-month-day".
+		   Year, month and day must be integers. Month within [1, 12], day within [1, 31] */
 		try {
 			stringstream stream(dateString);
 
@@ -36,17 +40,17 @@ public:
 			EnsureGoodStream(stream);
 			EnsureSkipNextSymbol(stream);
 
-			// Check month value [1, 12]
-			if (month < 1 || month > 12) {
-				string curMonth = "Month value is invalid: " + to_string(month);
-				throw invalid_argument(curMonth);
-			}
-
 			stream >> day;
 			EnsureGoodStream(stream);
 
 			if (stream.peek() != EOF) {
 				throw runtime_error("");
+			}
+
+			// Check month value [1, 12]
+			if (month < 1 || month > 12) {
+				string curMonth = "Month value is invalid: " + to_string(month);
+				throw invalid_argument(curMonth);
 			}
 
 			// Check day value [1, 31]
@@ -97,13 +101,37 @@ bool operator < (const Date& lhs, const Date& rhs) {
 
 class Database {
 public:
-	void AddEvent(const Date& date, const string& event);
-	bool DeleteEvent(const Date& date, const string& event);
-	int  DeleteDate(const Date& date);
+	// Add event to database, using constructed Date as key in a map
+	void AddEvent(const Date& date, const string& event) {
+		eventsDBmap[date].insert(event);
+	}
+	/* Delete event if given date is in a database.
+	   If success returns true and false otherwise */
+	bool DeleteEvent(const Date& date, const string& event) {
+		if (eventsDBmap.count(date) > 0) {
+			bool isRemoved = eventsDBmap[date].erase(event) == 1;
+			return isRemoved;
+		}
+		return false;
+	}
+	/* Delete given date from database.
+	   Returns number of deleted events in given date. */
+	int  DeleteDate(const Date& date) {
+		int numberDeleted = 0;
+		if (eventsDBmap.count(date) > 0) {
+			numberDeleted = eventsDBmap[date].size();
+			eventsDBmap.erase(date);
+		}
+
+		return numberDeleted;
+	}
 
 	/* ??? */ Find(const Date& date) const;
   
 	void Print() const;
+
+private:
+	map<Date, set<string>> eventsDBmap;
 };
 
 int main() {
