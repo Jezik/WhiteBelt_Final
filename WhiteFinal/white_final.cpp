@@ -159,15 +159,47 @@ int main() {
 	string command;
 	while (getline(cin, command)) {
 		// Считайте команды с потока ввода и обработайте каждую
+		if (command != "") {
+
+			string operation, dateString, eventString;
+			stringstream stream(command);
+			while (stream.peek() != EOF) {
+				stream >> operation >> dateString >> eventString;
+			}
+
+			if (operation == "Add") {
+				db.AddEvent(Date(dateString), eventString);
+			}
+			else if (operation == "Del") {
+				if (eventString == "") {
+					int deleted = db.DeleteDate(Date(dateString));
+					cout << "Deleted " << deleted << " events" << endl;
+				}
+				else {
+					bool isSuccess = db.DeleteEvent(Date(dateString), eventString);
+					if (isSuccess) {
+						cout << "Deleted successfully" << endl;
+					}
+					else {
+						cout << "Event not found" << endl;
+					}
+				}
+			}
+			else if (operation == "Find") {
+				set<string> events = db.Find(Date(dateString));
+				for (const auto& str : events) {
+					cout << str << endl;
+				}
+			}
+			else if (operation == "Print") {
+				db.Print();
+			}
+			else {
+				cout << "Unknown command: " << command;
+				exit(1);
+			}
+		}
 	}
-
-	/*string str;
-	cin >> str;
-
-	Date date(str);
-
-	cout << date.GetDay() << " " << date.GetMonth() << " " << date.GetYear() << endl;*/
-
-	system("pause");
+	
 	return 0;
 }
